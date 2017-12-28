@@ -1,7 +1,9 @@
 package com.mycamera;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -9,14 +11,18 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.widget.Toast;
 
 
 import com.mycamera.util.ImageEnviromentUtil;
+import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Locale;
+
+import io.reactivex.functions.Consumer;
 
 /**
  * 说明:
@@ -50,7 +56,7 @@ public class CameraPhotoHelper {
     }
 
     /**
-     *忽略物理感应器
+     * 忽略物理感应器
      */
     private void setActivityRequestedOrientation() {
         mContext.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
@@ -76,28 +82,40 @@ public class CameraPhotoHelper {
      * 拍照
      */
     public void takePhotoFromCamera() {
-        String status = Environment.getExternalStorageState();
-        if (status.equals(Environment.MEDIA_MOUNTED)) {
-            try {
-                File filePicScreenshot = ImageEnviromentUtil.getScreenshot();
-                String localTempImageFileName = ImageEnviromentUtil.getFileName();
-                if (!filePicScreenshot.exists()) {
-                    filePicScreenshot.mkdirs();
-                }
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                File f = new File(filePicScreenshot, localTempImageFileName);
-                Uri u = Uri.fromFile(f);
-                intent.putExtra(MediaStore.Images.Media.ORIENTATION, 0);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, u);
-                mContext.startActivityForResult(intent, REQUEST_CODE_CAMERA);
-                String imagePath = f.getAbsolutePath();
-                setCameraPicturePath(imagePath);
-                setCameraFile(f);
-            } catch (ActivityNotFoundException ignored) {
-            }
-        } else {
-            Toast.makeText(mContext, "请插入SD后，再试一下", Toast.LENGTH_LONG).show();
-        }
+        new RxPermissions(mContext).request(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .subscribe(new Consumer<Boolean>() {
+                    @Override
+                    public void accept(Boolean aBoolean) throws Exception {
+                        if (!aBoolean) return;
+                        String status = Environment.getExternalStorageState();
+                        if (status.equals(Environment.MEDIA_MOUNTED)) {
+                            try {
+                                File filePicScreenshot = ImageEnviromentUtil.getScreenshot();
+                                String localTempImageFileName = ImageEnviromentUtil.getFileName();
+                                if (!filePicScreenshot.exists()) {
+                                    filePicScreenshot.mkdirs();
+                                }
+                                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                File f = new File(filePicScreenshot, localTempImageFileName);
+                                Uri u;
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                    u = FileProvider.getUriForFile(mContext, mContext.getPackageName() + ".fileprovider", f);
+                                } else {
+                                    u = Uri.fromFile(f);
+                                }
+                                intent.putExtra(MediaStore.Images.Media.ORIENTATION, 0);
+                                intent.putExtra(MediaStore.EXTRA_OUTPUT, u);
+                                mContext.startActivityForResult(intent, REQUEST_CODE_CAMERA);
+                                String imagePath = f.getAbsolutePath();
+                                setCameraPicturePath(imagePath);
+                                setCameraFile(f);
+                            } catch (ActivityNotFoundException ignored) {
+                            }
+                        } else {
+                            Toast.makeText(mContext, "请插入SD后，再试一下", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
     }
 
     /**
@@ -112,10 +130,17 @@ public class CameraPhotoHelper {
      *
      * @param needSelectAmount 需要选择的图片张数
      */
-    public void selectMoreFormAlbum(int needSelectAmount) {
-        Intent intent = new Intent(mContext, AlbumActivity.class);
-        intent.putExtra(INTENT_KEY_NEED_SELECT_AMOUNT, needSelectAmount);
-        mContext.startActivityForResult(intent, REQUEST_CODE_ALBUM);
+    public void selectMoreFormAlbum(final int needSelectAmount) {
+        new RxPermissions(mContext).request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .subscribe(new Consumer<Boolean>() {
+                    @Override
+                    public void accept(Boolean aBoolean) throws Exception {
+                        if (!aBoolean) return;
+                        Intent intent = new Intent(mContext, AlbumActivity.class);
+                        intent.putExtra(INTENT_KEY_NEED_SELECT_AMOUNT, needSelectAmount);
+                        mContext.startActivityForResult(intent, REQUEST_CODE_ALBUM);
+                    }
+                });
     }
 
 
