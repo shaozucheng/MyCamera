@@ -146,27 +146,6 @@ public class AlbumActivity extends Activity implements OnImageDirSelected {
     }
 
 
-//    @Override
-//    public void selected(ImageFolder folder) {
-//        mImgDir = new File(folder.getDir());
-//        mImgDirPicture = Arrays.asList(mImgDir.list(new FilenameFilter() {
-//            @Override
-//            public boolean accept(File dir, String filename) {
-//                if (filename.endsWith(".jpg") || filename.endsWith(".png") || filename.endsWith(".jpeg"))
-//                    return true;
-//                return false;
-//            }
-//        }));
-//        //把排序翻转，按时间最新的排序
-//        Collections.reverse(mImgDirPicture);
-//        //可以看到文件夹的路径和图片的路径分开保存，极大的减少了内存的消耗；
-//        mAdapter = new MyAdapter(getApplicationContext(), mImgDirPicture, R.layout.grid_item, mImgDir.getAbsolutePath(), mNeedSelectAmount);
-//        mGirdView.setAdapter(mAdapter);
-//        mImageCount.setText(folder.getCount() + "张");
-//        mChooseDir.setText(folder.getName());
-//        mImageDirListDialog.dismiss();
-//    }
-
     /**
      * 为底部的布局设置点击事件，弹出dialog
      */
@@ -183,7 +162,14 @@ public class AlbumActivity extends Activity implements OnImageDirSelected {
      * 初始化展示文件夹的dialog
      */
     private void initImageDirDialog() {
-        mImageDirListDialog = new ImageDirListDialog(AlbumActivity.this, mImageFolders);
+        if (mImageFolders == null || mImageFolders.size() == 0) return;
+        List<ImageFolder> imageFolderList = new ArrayList<>();
+        for (ImageFolder imageFolder : mImageFolders) {//过滤掉文件夹中没有图片的图片文件夹
+            if (imageFolder.getCount() > 0) {
+                imageFolderList.add(imageFolder);
+            }
+        }
+        mImageDirListDialog = new ImageDirListDialog(AlbumActivity.this, imageFolderList);
         // 设置选择文件夹的回调
         mImageDirListDialog.setOnImageDirSelected(this);
     }

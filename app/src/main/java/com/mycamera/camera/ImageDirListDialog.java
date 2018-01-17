@@ -3,14 +3,17 @@ package com.mycamera.camera;
 import android.content.Context;
 import android.support.v7.app.AppCompatDialog;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.mycamera.R;
 import com.mycamera.cameralibrary.ImageFolder;
 import com.mycamera.cameralibrary.OnImageDirSelected;
+import com.mycamera.util.DialogUtils;
 
 import java.util.List;
 
@@ -32,6 +35,8 @@ public class ImageDirListDialog {
     public ImageDirListDialog(Context context, final List<ImageFolder> mImageFolders) {
         mContext = context;
         mDialog = new AppCompatDialog(context, R.style.camera_dialog_no_screen);
+        DialogUtils.resetDialogScreenPosition(mDialog, Gravity.BOTTOM, 0, 0, WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.WRAP_CONTENT);
         mDialog.setCancelable(true);
         mDialog.setCanceledOnTouchOutside(true);
         mDialog.show();

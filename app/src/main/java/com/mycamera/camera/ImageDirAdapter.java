@@ -1,6 +1,7 @@
 package com.mycamera.camera;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -8,6 +9,7 @@ import android.widget.TextView;
 
 import com.mycamera.R;
 import com.mycamera.cameralibrary.ImageFolder;
+import com.mycamera.cameralibrary.ImageLoader;
 
 
 /**
@@ -46,7 +48,10 @@ public class ImageDirAdapter extends HBaseAdapter<ImageFolder> {
 
         @Override
         public void bindViews(ImageFolder object) {
-          //  ImageLoader.getInstance(3, ImageLoader.Type.LIFO).loadImage(object.getFirstImagePath(), mImageView);
+            String firstImagePath = object.getFirstImagePath();
+            if (!TextUtils.isEmpty(firstImagePath)) {
+                ImageLoader.getInstance().loadImage(firstImagePath, mImageView);
+            }
             mDirNameTextView.setText(object.getName());
             mDirCountTextView.setText(object.getCount() + "张");
         }

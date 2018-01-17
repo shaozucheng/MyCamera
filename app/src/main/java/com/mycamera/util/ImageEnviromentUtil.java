@@ -33,7 +33,7 @@ public class ImageEnviromentUtil {
     }
 
     public static String getFileName() {
-        return String.valueOf((new Date()).getTime()) + ".JPEG";
+        return String.valueOf((new Date()).getTime()) + ".PNG";
     }
 
     /**

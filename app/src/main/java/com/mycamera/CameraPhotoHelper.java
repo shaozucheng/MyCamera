@@ -3,7 +3,6 @@ package com.mycamera;
 import android.Manifest;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -13,7 +12,6 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.widget.Toast;
-
 
 import com.mycamera.util.ImageEnviromentUtil;
 import com.tbruyelle.rxpermissions2.RxPermissions;

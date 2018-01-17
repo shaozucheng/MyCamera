@@ -55,7 +55,7 @@ public class ScanPictureTask extends AsyncTask<Void, Boolean, ScanPictureData> {
                 MediaStore.Images.Media.MIME_TYPE + "=? or " + MediaStore.Images.Media.MIME_TYPE + "=?", new String[]{"image/jpeg", "image/png"},
                 MediaStore.Images.Media.DATE_MODIFIED);
 
-        Log.e("TAG", mCursor.getCount() + "");
+        Log.i("TAG", mCursor.getCount() + "");
         while (mCursor.moveToNext()) {
             // 获取图片的路径
             String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DATA));
