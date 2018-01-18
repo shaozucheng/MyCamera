@@ -23,8 +23,10 @@
             android:listSelector="@android:color/transparent"
             android:numColumns="3"
             android:stretchMode="columnWidth"
-            android:verticalSpacing="3dp">
+            android:verticalSpacing="3dp"
+            android:visibility="gone">
         </GridView>
+
 
         <RelativeLayout
             android:id="@+id/id_bottom_layout"
@@ -55,5 +57,12 @@
                 android:text="0张"
                 android:textColor="@android:color/white"/>
         </RelativeLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/album_RecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/id_bottom_layout"/>
+
     </RelativeLayout>
 </LinearLayout>

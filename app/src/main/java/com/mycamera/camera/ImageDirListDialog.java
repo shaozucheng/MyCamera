@@ -2,15 +2,16 @@ package com.mycamera.camera;
 
 import android.content.Context;
 import android.support.v7.app.AppCompatDialog;
-import android.util.DisplayMetrics;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ListView;
 
 import com.mycamera.R;
+import com.mycamera.adapter.ImageDirRecycleAdapter;
+import com.mycamera.adapter.OnItemClickListener;
 import com.mycamera.cameralibrary.ImageFolder;
 import com.mycamera.cameralibrary.OnImageDirSelected;
 import com.mycamera.util.DialogUtils;
@@ -26,11 +27,9 @@ import java.util.List;
 public class ImageDirListDialog {
     private Context mContext;
     private AppCompatDialog mDialog;
-    private ListView mListDir;
     private OnImageDirSelected mImageDirSelected;
-    private static DisplayMetrics sDisplayMetrics = null;
-    private static final float ROUND_DIFFERENCE = 0.5f;
-    private ImageDirAdapter imageDirAdapter;
+    private RecyclerView mRecyclerView;
+    private ImageDirRecycleAdapter mImageDirRecycleAdapter;
 
     public ImageDirListDialog(Context context, final List<ImageFolder> mImageFolders) {
         mContext = context;
@@ -44,18 +43,23 @@ public class ImageDirListDialog {
         window.setContentView(R.layout.list_dir);
         window.setWindowAnimations(R.style.camera_dialog_enter_exit);  //添加dialog进入和退出的动画
 
-        mListDir = (ListView) window.findViewById(R.id.id_list_dir);
+        mRecyclerView = window.findViewById(R.id.image_dir_RecyclerView);
 
-        imageDirAdapter = new ImageDirAdapter(context);
-        imageDirAdapter.setData(mImageFolders);
-        mListDir.setAdapter(imageDirAdapter);
-
-        mListDir.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
+        mImageDirRecycleAdapter = new ImageDirRecycleAdapter(context);
+        mImageDirRecycleAdapter.setDatas(mImageFolders);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setAdapter(mImageDirRecycleAdapter);
+        mImageDirRecycleAdapter.setOnItemClickListener(new OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemClick(View view, int position) {
                 if (mImageDirSelected != null) {
                     mImageDirSelected.selectedImageFolder(mImageFolders.get(position));
                 }
+            }
+
+            @Override
+            public void onItemLongClick(View view, int position) {
             }
         });
     }
@@ -90,7 +94,6 @@ public class ImageDirListDialog {
     public void dismiss() {
         mDialog.dismiss();
     }
-
 
 
 }

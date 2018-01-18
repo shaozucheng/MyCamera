@@ -4,14 +4,16 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
+import com.mycamera.adapter.AlbumRecycleAdapter;
+import com.mycamera.adapter.OnItemClickListener;
 import com.mycamera.camera.ImageDirListDialog;
 import com.mycamera.cameralibrary.ImageFolder;
 import com.mycamera.cameralibrary.OnImageDirSelected;
@@ -33,7 +35,8 @@ import java.util.List;
 public class AlbumActivity extends Activity implements OnImageDirSelected {
     private ImageView mLeftImageView;
     private TextView mCompleteTextView;
-    private GridView mGirdView;//展示图片GirdView
+  //  private GridView mGirdView;//展示图片GirdView
+    private RecyclerView mRecyclerView;
     private TextView mChooseDir;//目录
     private TextView mImageCount;//图片数量
     private RelativeLayout mBottomLayout;//底部布局
@@ -50,8 +53,10 @@ public class AlbumActivity extends Activity implements OnImageDirSelected {
      * 图片文件夹下所有的图片
      */
     private List<String> mImgDirPicture;
+    private ArrayList<String> mSelectedImage = new ArrayList<>();
 
-    private MyAdapter mAdapter;//展示图片适配器
+    //    private MyAdapter mAdapter;//展示图片适配器
+    private AlbumRecycleAdapter mAlbumRecycleAdapter;
     private int mNeedSelectAmount = 1;
     private ImageDirListDialog mImageDirListDialog;
     ScanPictureTask scanPictureTask;
@@ -72,7 +77,8 @@ public class AlbumActivity extends Activity implements OnImageDirSelected {
     private void initView() {
         mLeftImageView = (ImageView) findViewById(R.id.screen_left_btn);
         mCompleteTextView = (TextView) findViewById(R.id.tv_screen_complete);
-        mGirdView = (GridView) findViewById(R.id.album_gridView);
+     //   mGirdView = (GridView) findViewById(R.id.album_gridView);
+        mRecyclerView = findViewById(R.id.album_RecyclerView);
         mChooseDir = (TextView) findViewById(R.id.id_choose_dir);
         mImageCount = (TextView) findViewById(R.id.id_total_count);
         mBottomLayout = (RelativeLayout) findViewById(R.id.id_bottom_layout);
@@ -92,8 +98,8 @@ public class AlbumActivity extends Activity implements OnImageDirSelected {
         mCompleteTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mAdapter == null) return;
-                ArrayList<String> selectImage = mAdapter.getSelectedImage();
+                if (mAlbumRecycleAdapter == null) return;
+                ArrayList<String> selectImage = mAlbumRecycleAdapter.getSelectedImage();
                 if (selectImage.size() == 0) {
                     Toast.makeText(AlbumActivity.this, "您还没有选择图片", Toast.LENGTH_LONG).show();
                     return;
@@ -139,10 +145,30 @@ public class AlbumActivity extends Activity implements OnImageDirSelected {
         //把排序翻转，按时间最新的排序
         Collections.reverse(mImgDirPicture);
         //可以看到文件夹的路径和图片的路径分开保存，极大的减少了内存的消耗；
-        mAdapter = new MyAdapter(AlbumActivity.this, mImgDirPicture, R.layout.grid_item, mImgDir.getAbsolutePath(), mNeedSelectAmount);
-        mGirdView.setAdapter(mAdapter);
+//        mAdapter = new MyAdapter(AlbumActivity.this, mImgDirPicture, R.layout.grid_item, mImgDir.getAbsolutePath(), mNeedSelectAmount);
+//        mGirdView.setAdapter(mAdapter);
+
+        mAlbumRecycleAdapter = new AlbumRecycleAdapter(this);
+        mAlbumRecycleAdapter.setNeedSelectAmount(mNeedSelectAmount);
+        mAlbumRecycleAdapter.setDirPath(mImgDir.getAbsolutePath());
+        mAlbumRecycleAdapter.setDatas(mImgDirPicture);
+        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
+        mRecyclerView.setAdapter(mAlbumRecycleAdapter);
+
         mImageCount.setText(mImgDirPicture.size() + "张");
         mChooseDir.setText(mImgDir.getName());
+
+        mAlbumRecycleAdapter.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+
+            }
+
+            @Override
+            public void onItemLongClick(View view, int position) {
+
+            }
+        });
     }
 
 
@@ -188,10 +214,21 @@ public class AlbumActivity extends Activity implements OnImageDirSelected {
         //把排序翻转，按时间最新的排序
         Collections.reverse(mImgDirPicture);
         //可以看到文件夹的路径和图片的路径分开保存，极大的减少了内存的消耗；
-        mAdapter = new MyAdapter(getApplicationContext(), mImgDirPicture, R.layout.grid_item, mImgDir.getAbsolutePath(), mNeedSelectAmount);
-        mGirdView.setAdapter(mAdapter);
+//        mAdapter = new MyAdapter(getApplicationContext(), mImgDirPicture, R.layout.grid_item, mImgDir.getAbsolutePath(), mNeedSelectAmount);
+//        mGirdView.setAdapter(mAdapter);
+
+
+       // mAlbumRecycleAdapter = new AlbumRecycleAdapter(this, mImgDir.getAbsolutePath(), mNeedSelectAmount);
+        mAlbumRecycleAdapter.setDatas(mImgDirPicture);
+//        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
+//        mRecyclerView.setAdapter(mAlbumRecycleAdapter);
+        mAlbumRecycleAdapter.setDirPath(mImgDir.getAbsolutePath());
+        mAlbumRecycleAdapter.notifyDataSetChanged();
+
         mImageCount.setText(folder.getCount() + "张");
         mChooseDir.setText(folder.getName());
         mImageDirListDialog.dismiss();
+
+
     }
 }
