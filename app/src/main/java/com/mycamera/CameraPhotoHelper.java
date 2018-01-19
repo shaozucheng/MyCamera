@@ -13,6 +13,7 @@ import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.widget.Toast;
 
+import com.mycamera.camera.AlbumActivity;
 import com.mycamera.util.ImageEnviromentUtil;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 

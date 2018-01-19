@@ -53,7 +53,7 @@
         </provider>
 
         <activity
-            android:name=".AlbumActivity"
+            android:name=".camera.AlbumActivity"
             android:screenOrientation="portrait"/>
     </application>
 

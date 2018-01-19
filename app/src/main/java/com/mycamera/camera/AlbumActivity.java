@@ -1,4 +1,4 @@
-package com.mycamera;
+package com.mycamera.camera;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -12,9 +12,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mycamera.CameraPhotoHelper;
+import com.mycamera.R;
 import com.mycamera.adapter.AlbumRecycleAdapter;
 import com.mycamera.adapter.OnItemClickListener;
-import com.mycamera.camera.ImageDirListDialog;
+import com.mycamera.cameralibrary.ImageData;
 import com.mycamera.cameralibrary.ImageFolder;
 import com.mycamera.cameralibrary.OnImageDirSelected;
 import com.mycamera.cameralibrary.ScanPictureData;
@@ -35,7 +37,6 @@ import java.util.List;
 public class AlbumActivity extends Activity implements OnImageDirSelected {
     private ImageView mLeftImageView;
     private TextView mCompleteTextView;
-  //  private GridView mGirdView;//展示图片GirdView
     private RecyclerView mRecyclerView;
     private TextView mChooseDir;//目录
     private TextView mImageCount;//图片数量
@@ -53,21 +54,20 @@ public class AlbumActivity extends Activity implements OnImageDirSelected {
      * 图片文件夹下所有的图片
      */
     private List<String> mImgDirPicture;
-    private ArrayList<String> mSelectedImage = new ArrayList<>();
 
-    //    private MyAdapter mAdapter;//展示图片适配器
-    private AlbumRecycleAdapter mAlbumRecycleAdapter;
-    private int mNeedSelectAmount = 1;
-    private ImageDirListDialog mImageDirListDialog;
-    ScanPictureTask scanPictureTask;
+    private ArrayList<String> mSelectedImageList = new ArrayList<>();//选择后的图片集合
+    private AlbumRecycleAdapter mAlbumRecycleAdapter;//展示图片适配器
+    private int mNeedSelectAmount = 1;//需要选择的图片数量，默认最少为1张
+    private ImageDirListDialog mImageDirListDialog;//图片文件夹对话框
+    private ScanPictureTask scanPictureTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_album);
         mNeedSelectAmount = getIntent().getIntExtra(CameraPhotoHelper.INTENT_KEY_NEED_SELECT_AMOUNT, 1);
-
         initView();
+        initAlbumAdapter();
         getImageData();
         initBottomEvent();
         completeOnClickListener();
@@ -77,7 +77,6 @@ public class AlbumActivity extends Activity implements OnImageDirSelected {
     private void initView() {
         mLeftImageView = (ImageView) findViewById(R.id.screen_left_btn);
         mCompleteTextView = (TextView) findViewById(R.id.tv_screen_complete);
-     //   mGirdView = (GridView) findViewById(R.id.album_gridView);
         mRecyclerView = findViewById(R.id.album_RecyclerView);
         mChooseDir = (TextView) findViewById(R.id.id_choose_dir);
         mImageCount = (TextView) findViewById(R.id.id_total_count);
@@ -94,18 +93,47 @@ public class AlbumActivity extends Activity implements OnImageDirSelected {
         });
     }
 
+    private void initAlbumAdapter() {
+        mAlbumRecycleAdapter = new AlbumRecycleAdapter(this);
+        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
+        mRecyclerView.setAdapter(mAlbumRecycleAdapter);
+        mAlbumRecycleAdapter.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                List<ImageData> imageDataList = mAlbumRecycleAdapter.getDatas();
+                ImageData imageData = imageDataList.get(position);
+                if (!mSelectedImageList.contains(imageData.getImageLocalPath())) {
+                    if (mSelectedImageList.size() >= mNeedSelectAmount) {
+                        Toast.makeText(AlbumActivity.this, "最多可选择" + mNeedSelectAmount + "张图片", Toast.LENGTH_LONG).show();
+                    } else {
+                        mSelectedImageList.add(imageData.getImageLocalPath());
+                        imageData.setSelect(true);
+                        mAlbumRecycleAdapter.notifyItemChanged(position);
+                    }
+                } else {
+                    mSelectedImageList.remove(imageData.getImageLocalPath());
+                    imageData.setSelect(false);
+                    mAlbumRecycleAdapter.notifyItemChanged(position);
+                }
+            }
+
+            @Override
+            public void onItemLongClick(View view, int position) {
+
+            }
+        });
+    }
+
     private void completeOnClickListener() {
         mCompleteTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mAlbumRecycleAdapter == null) return;
-                ArrayList<String> selectImage = mAlbumRecycleAdapter.getSelectedImage();
-                if (selectImage.size() == 0) {
+                if (mSelectedImageList.size() == 0) {
                     Toast.makeText(AlbumActivity.this, "您还没有选择图片", Toast.LENGTH_LONG).show();
                     return;
                 }
                 Intent mIntent = new Intent();
-                mIntent.putStringArrayListExtra(CameraPhotoHelper.INTENT_KEY_ALBUM, selectImage);
+                mIntent.putStringArrayListExtra(CameraPhotoHelper.INTENT_KEY_ALBUM, mSelectedImageList);
                 setResult(RESULT_OK, mIntent);
                 finish();
             }
@@ -145,30 +173,11 @@ public class AlbumActivity extends Activity implements OnImageDirSelected {
         //把排序翻转，按时间最新的排序
         Collections.reverse(mImgDirPicture);
         //可以看到文件夹的路径和图片的路径分开保存，极大的减少了内存的消耗；
-//        mAdapter = new MyAdapter(AlbumActivity.this, mImgDirPicture, R.layout.grid_item, mImgDir.getAbsolutePath(), mNeedSelectAmount);
-//        mGirdView.setAdapter(mAdapter);
-
-        mAlbumRecycleAdapter = new AlbumRecycleAdapter(this);
-        mAlbumRecycleAdapter.setNeedSelectAmount(mNeedSelectAmount);
-        mAlbumRecycleAdapter.setDirPath(mImgDir.getAbsolutePath());
-        mAlbumRecycleAdapter.setDatas(mImgDirPicture);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
-        mRecyclerView.setAdapter(mAlbumRecycleAdapter);
-
+        List<ImageData> imageDataList = getImageDataList();
+        mAlbumRecycleAdapter.setDatas(imageDataList);
+        mAlbumRecycleAdapter.notifyDataSetChanged();
         mImageCount.setText(mImgDirPicture.size() + "张");
         mChooseDir.setText(mImgDir.getName());
-
-        mAlbumRecycleAdapter.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-
-            }
-
-            @Override
-            public void onItemLongClick(View view, int position) {
-
-            }
-        });
     }
 
 
@@ -214,21 +223,32 @@ public class AlbumActivity extends Activity implements OnImageDirSelected {
         //把排序翻转，按时间最新的排序
         Collections.reverse(mImgDirPicture);
         //可以看到文件夹的路径和图片的路径分开保存，极大的减少了内存的消耗；
-//        mAdapter = new MyAdapter(getApplicationContext(), mImgDirPicture, R.layout.grid_item, mImgDir.getAbsolutePath(), mNeedSelectAmount);
-//        mGirdView.setAdapter(mAdapter);
-
-
-       // mAlbumRecycleAdapter = new AlbumRecycleAdapter(this, mImgDir.getAbsolutePath(), mNeedSelectAmount);
-        mAlbumRecycleAdapter.setDatas(mImgDirPicture);
-//        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
-//        mRecyclerView.setAdapter(mAlbumRecycleAdapter);
-        mAlbumRecycleAdapter.setDirPath(mImgDir.getAbsolutePath());
+        List<ImageData> imageDataList = getImageDataList();
+        mAlbumRecycleAdapter.setDatas(imageDataList);
         mAlbumRecycleAdapter.notifyDataSetChanged();
 
         mImageCount.setText(folder.getCount() + "张");
         mChooseDir.setText(folder.getName());
         mImageDirListDialog.dismiss();
+    }
 
-
+    private List<ImageData> getImageDataList() {
+        List<ImageData> imageDataList = new ArrayList<>();
+        for (int i = 0; i < mImgDirPicture.size(); i++) {
+            ImageData imageData = new ImageData();
+            imageData.setImageLocalPath(mImgDir.getAbsolutePath() + "/" + mImgDirPicture.get(i));
+            imageData.setSelect(false);
+            imageDataList.add(imageData);
+        }
+        if (mSelectedImageList.size() > 0) {
+            for (int i = 0; i < mSelectedImageList.size(); i++) {
+                for (int j = 0; j < imageDataList.size(); j++) {
+                    if (mSelectedImageList.get(i).equals(imageDataList.get(j).getImageLocalPath())) {
+                        imageDataList.get(j).setSelect(true);
+                    }
+                }
+            }
+        }
+        return imageDataList;
     }
 }

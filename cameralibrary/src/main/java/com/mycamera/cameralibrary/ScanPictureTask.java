@@ -21,6 +21,7 @@ import java.util.List;
  * Time:16/4/14 上午11:08
  */
 public class ScanPictureTask extends AsyncTask<Void, Boolean, ScanPictureData> {
+    public static final String TAG = ScanPictureTask.class.getSimpleName();
     Context mContext;
     ScanPictureCallBack mScanPictureCallBack;//扫描完成回调
     ScanPictureData scanPictureData = new ScanPictureData();//存放扫描数据的
@@ -46,7 +47,6 @@ public class ScanPictureTask extends AsyncTask<Void, Boolean, ScanPictureData> {
 
     @Override
     protected ScanPictureData doInBackground(Void... params) {
-
         String firstImage = null;
         Uri mImageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         ContentResolver mContentResolver = mContext.getContentResolver();
@@ -54,55 +54,57 @@ public class ScanPictureTask extends AsyncTask<Void, Boolean, ScanPictureData> {
         Cursor mCursor = mContentResolver.query(mImageUri, null,
                 MediaStore.Images.Media.MIME_TYPE + "=? or " + MediaStore.Images.Media.MIME_TYPE + "=?", new String[]{"image/jpeg", "image/png"},
                 MediaStore.Images.Media.DATE_MODIFIED);
-
-        Log.i("TAG", mCursor.getCount() + "");
-        while (mCursor.moveToNext()) {
-            // 获取图片的路径
-            String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DATA));
-            // Log.e("TAG", path);
-            // 拿到第一张图片的路径
-            if (firstImage == null)
-                firstImage = path;
-            // 获取该图片的父路径名
-            File parentFile = new File(path).getParentFile();
-            if (parentFile == null)
-                continue;
-            String dirPath = parentFile.getAbsolutePath();
-            ImageFolder imageFolder = null;
-            // 利用一个HashSet防止多次扫描同一个文件夹（不加这个判断，图片多起来还是相当恐怖的~~）
-            if (mDirPaths.contains(dirPath)) {
-                continue;
-            } else {
-                mDirPaths.add(dirPath);
-                // 初始化imageFolder
-                imageFolder = new ImageFolder();
-                imageFolder.setDir(dirPath);
-                imageFolder.setFirstImagePath(path);
-            }
-
-            if (parentFile.list() == null) {//解决部分手机报空指针
-                continue;
-            }
-
-            int picSize = parentFile.list(new FilenameFilter() {
-                @Override
-                public boolean accept(File dir, String filename) {
-                    if (filename.endsWith(".jpg") || filename.endsWith(".png") || filename.endsWith(".jpeg"))
-                        return true;
-                    return false;
+        if (mCursor != null) {
+           // Log.i(TAG, "image count =" + mCursor.getCount());
+            while (mCursor.moveToNext()) {
+                // 获取图片的路径
+                String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                String thumPath = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Thumbnails.DATA));
+              //  Log.i(TAG, " path = " + path);
+              //  Log.i(TAG, " thumPath = " + thumPath);
+                // 拿到第一张图片的路径
+                if (firstImage == null)
+                    firstImage = path;
+                // 获取该图片的父路径名
+                File parentFile = new File(path).getParentFile();
+                if (parentFile == null)
+                    continue;
+                String dirPath = parentFile.getAbsolutePath();
+                ImageFolder imageFolder = null;
+                // 利用一个HashSet防止多次扫描同一个文件夹（不加这个判断，图片多起来还是相当恐怖的~~）
+                if (mDirPaths.contains(dirPath)) {
+                    continue;
+                } else {
+                    mDirPaths.add(dirPath);
+                    // 初始化imageFolder
+                    imageFolder = new ImageFolder();
+                    imageFolder.setDir(dirPath);
+                    imageFolder.setFirstImagePath(path);
                 }
-            }).length;
-            mTotalCount += picSize;
-            imageFolder.setCount(picSize);
-            mImageFolders.add(imageFolder);
 
-            if (picSize > mPictureMaximumSize) {
-                mPictureMaximumSize = picSize;
-                mPictureMaximumDir = parentFile;
+                if (parentFile.list() == null) {//解决部分手机报空指针
+                    continue;
+                }
+
+                int picSize = parentFile.list(new FilenameFilter() {
+                    @Override
+                    public boolean accept(File dir, String filename) {
+                        if (filename.endsWith(".jpg") || filename.endsWith(".png") || filename.endsWith(".jpeg"))
+                            return true;
+                        return false;
+                    }
+                }).length;
+                mTotalCount += picSize;
+                imageFolder.setCount(picSize);
+                mImageFolders.add(imageFolder);
+
+                if (picSize > mPictureMaximumSize) {
+                    mPictureMaximumSize = picSize;
+                    mPictureMaximumDir = parentFile;
+                }
             }
+            mCursor.close();
         }
-        mCursor.close();
-
         scanPictureData.setImageFolders(mImageFolders);
         scanPictureData.setPictureMaximumDir(mPictureMaximumDir);
         scanPictureData.setPictureMaximumSize(mPictureMaximumSize);
@@ -115,6 +117,7 @@ public class ScanPictureTask extends AsyncTask<Void, Boolean, ScanPictureData> {
     protected void onPostExecute(ScanPictureData scanPictureData) {
         super.onPostExecute(scanPictureData);
         // 扫描完成，辅助的HashSet也就可以释放内存了
+        mDirPaths.clear();
         mDirPaths = null;
         if (mProgressDialog != null) {
             mProgressDialog.dismiss();
