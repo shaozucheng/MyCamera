@@ -9,8 +9,13 @@ import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import com.mycamera.cameralibrary.util.FileUtil;
+
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -55,13 +60,13 @@ public class ScanPictureTask extends AsyncTask<Void, Boolean, ScanPictureData> {
                 MediaStore.Images.Media.MIME_TYPE + "=? or " + MediaStore.Images.Media.MIME_TYPE + "=?", new String[]{"image/jpeg", "image/png"},
                 MediaStore.Images.Media.DATE_MODIFIED);
         if (mCursor != null) {
-           // Log.i(TAG, "image count =" + mCursor.getCount());
+            // Log.i(TAG, "image count =" + mCursor.getCount());
             while (mCursor.moveToNext()) {
                 // 获取图片的路径
                 String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DATA));
                 String thumPath = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Thumbnails.DATA));
-              //  Log.i(TAG, " path = " + path);
-              //  Log.i(TAG, " thumPath = " + thumPath);
+                Log.i(TAG, " path = " + path);
+                //  Log.i(TAG, " thumPath = " + thumPath);
                 // 拿到第一张图片的路径
                 if (firstImage == null)
                     firstImage = path;
@@ -69,13 +74,14 @@ public class ScanPictureTask extends AsyncTask<Void, Boolean, ScanPictureData> {
                 File parentFile = new File(path).getParentFile();
                 if (parentFile == null)
                     continue;
-                String dirPath = parentFile.getAbsolutePath();
+                final String dirPath = parentFile.getAbsolutePath();
                 ImageFolder imageFolder = null;
                 // 利用一个HashSet防止多次扫描同一个文件夹（不加这个判断，图片多起来还是相当恐怖的~~）
                 if (mDirPaths.contains(dirPath)) {
                     continue;
                 } else {
                     mDirPaths.add(dirPath);
+                    Log.i(TAG, " dirPath = " + dirPath);
                     // 初始化imageFolder
                     imageFolder = new ImageFolder();
                     imageFolder.setDir(dirPath);
@@ -89,8 +95,14 @@ public class ScanPictureTask extends AsyncTask<Void, Boolean, ScanPictureData> {
                 int picSize = parentFile.list(new FilenameFilter() {
                     @Override
                     public boolean accept(File dir, String filename) {
-                        if (filename.endsWith(".jpg") || filename.endsWith(".png") || filename.endsWith(".jpeg"))
-                            return true;
+                        File file = new File(dirPath + "/" + filename);
+                        Long size = FileUtil.getFileSize(file) / 1024;//将文件大小转成KB
+                        Log.i(TAG, " size = " + size);
+                        if (size > 0) {
+                            if (filename.endsWith(".jpg") || filename.endsWith(".png") || filename.endsWith(".jpeg")) {
+                                return true;
+                            }
+                        }
                         return false;
                     }
                 }).length;
@@ -125,6 +137,7 @@ public class ScanPictureTask extends AsyncTask<Void, Boolean, ScanPictureData> {
         }
         mScanPictureCallBack.ScanPictureComplete(scanPictureData);
     }
+
 
     public interface ScanPictureCallBack {
         void ScanPictureComplete(ScanPictureData scanPictureData);

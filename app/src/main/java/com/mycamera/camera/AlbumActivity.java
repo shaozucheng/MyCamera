@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -21,6 +22,7 @@ import com.mycamera.cameralibrary.ImageFolder;
 import com.mycamera.cameralibrary.OnImageDirSelected;
 import com.mycamera.cameralibrary.ScanPictureData;
 import com.mycamera.cameralibrary.ScanPictureTask;
+import com.mycamera.cameralibrary.util.FileUtil;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -215,8 +217,14 @@ public class AlbumActivity extends Activity implements OnImageDirSelected {
         mImgDirPicture = Arrays.asList(mImgDir.list(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String filename) {
-                if (filename.endsWith(".jpg") || filename.endsWith(".png") || filename.endsWith(".jpeg"))
-                    return true;
+                File file = new File(mImgDir.getAbsolutePath() + "/" + filename);
+                Log.i("album file path = ", file.getAbsolutePath());
+                Long size = FileUtil.getFileSize(file) / 1024;//将文件大小转成KB
+                if (size > 0) {
+                    if (filename.endsWith(".jpg") || filename.endsWith(".png") || filename.endsWith(".jpeg")) {
+                        return true;
+                    }
+                }
                 return false;
             }
         }));
