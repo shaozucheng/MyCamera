@@ -12,10 +12,7 @@ import android.util.Log;
 import com.mycamera.cameralibrary.util.FileUtil;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -64,9 +61,7 @@ public class ScanPictureTask extends AsyncTask<Void, Boolean, ScanPictureData> {
             while (mCursor.moveToNext()) {
                 // 获取图片的路径
                 String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DATA));
-                String thumPath = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Thumbnails.DATA));
                 Log.i(TAG, " path = " + path);
-                //  Log.i(TAG, " thumPath = " + thumPath);
                 // 拿到第一张图片的路径
                 if (firstImage == null)
                     firstImage = path;
@@ -77,35 +72,39 @@ public class ScanPictureTask extends AsyncTask<Void, Boolean, ScanPictureData> {
                 final String dirPath = parentFile.getAbsolutePath();
                 ImageFolder imageFolder = null;
                 // 利用一个HashSet防止多次扫描同一个文件夹（不加这个判断，图片多起来还是相当恐怖的~~）
+
                 if (mDirPaths.contains(dirPath)) {
+                    Log.i(TAG, " path contains = " + dirPath);
                     continue;
                 } else {
                     mDirPaths.add(dirPath);
-                    Log.i(TAG, " dirPath = " + dirPath);
+                    Log.i(TAG, " path else= " + path);
                     // 初始化imageFolder
                     imageFolder = new ImageFolder();
                     imageFolder.setDir(dirPath);
                     imageFolder.setFirstImagePath(path);
+
                 }
 
                 if (parentFile.list() == null) {//解决部分手机报空指针
                     continue;
                 }
 
-                int picSize = parentFile.list(new FilenameFilter() {
+                String[] picString = parentFile.list(new FilenameFilter() {
                     @Override
                     public boolean accept(File dir, String filename) {
-                        File file = new File(dirPath + "/" + filename);
-                        Long size = FileUtil.getFileSize(file) / 1024;//将文件大小转成KB
-                        Log.i(TAG, " size = " + size);
-                        if (size > 0) {
-                            if (filename.endsWith(".jpg") || filename.endsWith(".png") || filename.endsWith(".jpeg")) {
+                        if ((filename.endsWith(".jpg") || filename.endsWith(".png") || filename.endsWith(".jpeg")) && !filename.endsWith(".9.png")) {
+                            File file = new File(dirPath + "/" + filename);
+                            Long size = FileUtil.getFileSize(file) / 1024;//将文件大小转成KB
+                            Log.i(TAG, " size = " + size);
+                            if (size > 0) {
                                 return true;
                             }
                         }
                         return false;
                     }
-                }).length;
+                });
+                int picSize = picString.length;
                 mTotalCount += picSize;
                 imageFolder.setCount(picSize);
                 mImageFolders.add(imageFolder);

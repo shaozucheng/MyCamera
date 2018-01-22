@@ -174,6 +174,7 @@ public class AlbumActivity extends Activity implements OnImageDirSelected {
         mImgDirPicture = Arrays.asList(mImgDir.list());
         //把排序翻转，按时间最新的排序
         Collections.reverse(mImgDirPicture);
+
         //可以看到文件夹的路径和图片的路径分开保存，极大的减少了内存的消耗；
         List<ImageData> imageDataList = getImageDataList();
         mAlbumRecycleAdapter.setDatas(imageDataList);
@@ -217,11 +218,11 @@ public class AlbumActivity extends Activity implements OnImageDirSelected {
         mImgDirPicture = Arrays.asList(mImgDir.list(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String filename) {
-                File file = new File(mImgDir.getAbsolutePath() + "/" + filename);
-                Log.i("album file path = ", file.getAbsolutePath());
-                Long size = FileUtil.getFileSize(file) / 1024;//将文件大小转成KB
-                if (size > 0) {
-                    if (filename.endsWith(".jpg") || filename.endsWith(".png") || filename.endsWith(".jpeg")) {
+                if ((filename.endsWith(".jpg") || filename.endsWith(".png") || filename.endsWith(".jpeg")) && !filename.endsWith(".9.png")) {
+                    File file = new File(mImgDir.getAbsolutePath() + "/" + filename);
+                    // Log.i("album file path = ", file.getAbsolutePath());
+                    Long size = FileUtil.getFileSize(file) / 1024;//将文件大小转成KB
+                    if (size > 0) {
                         return true;
                     }
                 }

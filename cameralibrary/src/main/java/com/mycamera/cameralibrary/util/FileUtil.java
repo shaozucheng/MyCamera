@@ -28,10 +28,8 @@ public class FileUtil {
                 fis = new FileInputStream(file);
                 size = fis.available();
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
                 return 0;
             } catch (IOException e) {
-                e.printStackTrace();
                 return 0;
             }
         }
