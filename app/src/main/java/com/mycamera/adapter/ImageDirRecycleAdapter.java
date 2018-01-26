@@ -1,6 +1,7 @@
 package com.mycamera.adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 import com.mycamera.R;
 import com.mycamera.cameralibrary.ImageFolder;
 import com.mycamera.cameralibrary.ImageLoader;
+import com.mycamera.util.ImageEnviromentUtil;
 
 
 /**

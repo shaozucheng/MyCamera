@@ -82,13 +82,14 @@ public class ScanPictureTask extends AsyncTask<Void, Boolean, ScanPictureData> {
                     // 初始化imageFolder
                     imageFolder = new ImageFolder();
                     imageFolder.setDir(dirPath);
-                    imageFolder.setFirstImagePath(path);
+                    // imageFolder.setFirstImagePath(path);
 
                 }
 
                 if (parentFile.list() == null) {//解决部分手机报空指针
                     continue;
                 }
+
 
                 String[] picString = parentFile.list(new FilenameFilter() {
                     @Override
@@ -107,6 +108,9 @@ public class ScanPictureTask extends AsyncTask<Void, Boolean, ScanPictureData> {
                 int picSize = picString.length;
                 mTotalCount += picSize;
                 imageFolder.setCount(picSize);
+                if (picString.length > 0) {
+                    imageFolder.setFirstImagePath(dirPath + "/" + picString[0]);
+                }
                 mImageFolders.add(imageFolder);
 
                 if (picSize > mPictureMaximumSize) {

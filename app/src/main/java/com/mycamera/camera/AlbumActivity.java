@@ -173,7 +173,7 @@ public class AlbumActivity extends Activity implements OnImageDirSelected {
         }
         mImgDirPicture = Arrays.asList(mImgDir.list());
         //把排序翻转，按时间最新的排序
-        Collections.reverse(mImgDirPicture);
+      //  Collections.reverse(mImgDirPicture);
 
         //可以看到文件夹的路径和图片的路径分开保存，极大的减少了内存的消耗；
         List<ImageData> imageDataList = getImageDataList();
@@ -230,7 +230,7 @@ public class AlbumActivity extends Activity implements OnImageDirSelected {
             }
         }));
         //把排序翻转，按时间最新的排序
-        Collections.reverse(mImgDirPicture);
+      //  Collections.reverse(mImgDirPicture);
         //可以看到文件夹的路径和图片的路径分开保存，极大的减少了内存的消耗；
         List<ImageData> imageDataList = getImageDataList();
         mAlbumRecycleAdapter.setDatas(imageDataList);
