@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:padding="10dp"
-            android:text="单张图片"
+            android:text="选择图片或拍照入口"
             android:textColor="@color/bg_dark_gray_text"
             android:textSize="16sp"/>
 

@@ -26,14 +26,15 @@ import java.util.List;
  */
 public class ImageEnviromentUtil {
 
-    public static String IMAGE_PATH = Environment.getExternalStorageDirectory() + "/shaozucheng/";
+    public static String IMAGE_DIR_NAME = "shaozucheng/";
+    public static String IMAGE_PATH = Environment.getExternalStorageDirectory() + "/" + IMAGE_DIR_NAME;
 
     public static File getScreenshot() {
         return new File(IMAGE_PATH);
     }
 
     public static String getFileName() {
-        return String.valueOf((new Date()).getTime()) + ".PNG";
+        return String.valueOf((new Date()).getTime()) + ".jpeg";
     }
 
     /**
@@ -65,8 +66,6 @@ public class ImageEnviromentUtil {
                     options.inSampleSize = (int) Math.pow(2.0D, i);
                     options.inJustDecodeBounds = false;
                     bitmap = BitmapFactory.decodeStream(in, null, options);
-                    Log.e("TTTT", options.outWidth + "");
-                    Log.e("TTTT", options.outHeight + "");
                     break;
                 }
                 i += 1;
@@ -82,6 +81,13 @@ public class ImageEnviromentUtil {
     }
 
 
+    /**
+     * 图片压缩
+     *
+     * @param imagePath      路径
+     * @param maxNumOfPixels 压缩最大比例
+     * @return
+     */
     public static Bitmap decodeImage(String imagePath, int maxNumOfPixels) {
         Bitmap bitmap;
         if (TextUtils.isEmpty(imagePath))
@@ -184,7 +190,7 @@ public class ImageEnviromentUtil {
     public static String saveBitmap(Bitmap bitmap) {
         File dir = Environment.getExternalStorageDirectory();
         String fileName = new Date().getTime() + ".jpeg";
-        File imageFile = new File(dir + "/shaozucheng/", fileName);
+        File imageFile = new File(dir + "/" + IMAGE_DIR_NAME, fileName);
         OutputStream ops = null;
         try {
             ops = new FileOutputStream(imageFile);

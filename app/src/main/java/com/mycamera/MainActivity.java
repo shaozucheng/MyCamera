@@ -23,7 +23,6 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    public static String PATH = Environment.getExternalStorageDirectory() + "/shaozucheng";
     private TextView mSingleTextView;
     private ImageView mImageView;
     private GridView mGridView;
@@ -31,6 +30,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private CameraGridViewAdapter mAdapter;
     private List<Bitmap> mBitmapList = new ArrayList<>();
+    /**
+     * 需要的最多图片数量，在这里设置
+     */
     private static final int PICTURE_MAX = 4;
 
     @Override
@@ -73,21 +75,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-
-    /**
-     * 获取sd卡的路径
-     *
-     * @return 路径的字符串
-     */
-    public static String getSDPath() {
-        File sdDir = null;
-        boolean sdCardExist = Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED); // 判断sd卡是否存在
-        if (sdCardExist) {
-            sdDir = Environment.getExternalStorageDirectory();// 获取外存目录
-        }
-        return sdDir.toString();
-    }
-
     /**
      * 显示拍照和选择相册dialog
      */
@@ -120,19 +107,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mCameraPhotoHelper.onActivityResult(requestCode, resultCode, data, new CameraPhotoHelper.CameraPhotoCallBack() {
             @Override
             public void takePictureFromCamera(String imagePath) {
-                Bitmap mBitmap = ImageEnviromentUtil.compressImageSize(imagePath);
+                //TODO  这里是拍照后图片返回的路径。下面是我的案例，你可以按照自己项目的需求，处理图片
+
+                Bitmap mBitmap = ImageEnviromentUtil.compressImageSize(imagePath);//图片压缩
                 mImageView.setImageBitmap(mBitmap);
                 if (mBitmapList.size() < PICTURE_MAX) {
                     mBitmapList.add(mBitmap);
                     mAdapter.notifyDataSetChanged();
                 } else {
-                    Toast.makeText(MainActivity.this, "最多需要4张图片", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "最多需要" + PICTURE_MAX + "张图片", Toast.LENGTH_SHORT).show();
                 }
 
             }
 
             @Override
             public void takePictureFromGallery(ArrayList<String> imagePathList) {
+                //TODO 这里是图片选择后的回调，得到的是选择图片的地址集合，然后你可以按照自己的项目需求，处理图片，
                 List<Bitmap> bitmapList = ImageEnviromentUtil.getAlbumBitmapList(imagePathList);
                 mBitmapList.addAll(bitmapList);
                 mAdapter.notifyDataSetChanged();
