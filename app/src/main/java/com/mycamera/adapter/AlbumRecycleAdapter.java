@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.mycamera.R;
 import com.mycamera.cameralibrary.ImageData;
 import com.mycamera.cameralibrary.ImageLoader;
@@ -25,6 +26,7 @@ public class AlbumRecycleAdapter extends BaseRecycleAdapter<ImageData> {
     public AlbumRecycleAdapter(Context context) {
         super(context);
     }
+
     @Override
     public void onBind(RecyclerView.ViewHolder viewHolder, int RealPosition, ImageData data) {
         AlbumViewHolder albumViewHolder = (AlbumViewHolder) viewHolder;
@@ -53,7 +55,7 @@ public class AlbumRecycleAdapter extends BaseRecycleAdapter<ImageData> {
             //设置图片
             final String url = object.getImageLocalPath();
             if (!TextUtils.isEmpty(url)) {
-                ImageLoader.getInstance(3, ImageLoader.Type.LIFO).loadImage(url, mImageView);
+                Glide.with(getContext()).load(url).into(mImageView);
             }
             /**
              * 已经选择过的图片，显示出选择过的效果

@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.mycamera.R;
 import com.mycamera.cameralibrary.ImageFolder;
 import com.mycamera.cameralibrary.ImageLoader;
@@ -56,7 +58,7 @@ public class ImageDirRecycleAdapter extends BaseRecycleAdapter<ImageFolder> {
         public void bindViews(ImageFolder object) {
             String firstImagePath = object.getFirstImagePath();
             if (!TextUtils.isEmpty(firstImagePath)) {
-                ImageLoader.getInstance().loadImage(firstImagePath, mImageView);
+                Glide.with(mContext).load(firstImagePath).into(mImageView);
             }
             mDirNameTextView.setText(object.getName());
             mDirCountTextView.setText(object.getCount() + "张");
