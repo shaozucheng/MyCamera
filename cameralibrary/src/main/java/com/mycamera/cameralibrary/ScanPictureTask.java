@@ -34,6 +34,15 @@ public class ScanPictureTask extends AsyncTask<Void, Boolean, ScanPictureData> {
     int mTotalCount = 0;//总数量
     ProgressDialog mProgressDialog;//进度条
 
+    private final String[] IMAGE_PROJECTION = {     //查询图片需要的数据列
+            MediaStore.Images.Media.DISPLAY_NAME,   //图片的显示名称  aaa.jpg
+            MediaStore.Images.Media.DATA,           //图片的绝对路径
+            MediaStore.Images.Media.SIZE,           //图片的大小，long型  132492
+            MediaStore.Images.Media.WIDTH,          //图片的宽度，int型  1920
+            MediaStore.Images.Media.HEIGHT,         //图片的高度，int型  1080
+            MediaStore.Images.Media.MIME_TYPE,      //图片的类型     image/jpeg
+            MediaStore.Images.Media.DATE_ADDED};    //图片被添加的时间，long型  1450518608
+
     public ScanPictureTask(Context mContext, ScanPictureCallBack scanPictureCallBack) {
         this.mContext = mContext;
         mScanPictureCallBack = scanPictureCallBack;
@@ -53,9 +62,10 @@ public class ScanPictureTask extends AsyncTask<Void, Boolean, ScanPictureData> {
         Uri mImageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         ContentResolver mContentResolver = mContext.getContentResolver();
         // 只查询jpeg和png的图片
-        Cursor mCursor = mContentResolver.query(mImageUri, null,
-                MediaStore.Images.Media.MIME_TYPE + "=? or " + MediaStore.Images.Media.MIME_TYPE + "=?", new String[]{"image/jpeg", "image/png"},
-                MediaStore.Images.Media.DATE_MODIFIED);
+//        Cursor mCursor = mContentResolver.query(mImageUri, null,
+//                MediaStore.Images.Media.MIME_TYPE + "=? or " + MediaStore.Images.Media.MIME_TYPE + "=?", new String[]{"image/jpeg", "image/png"},
+//                MediaStore.Images.Media.DATE_MODIFIED);
+        Cursor mCursor = mContentResolver.query(mImageUri,IMAGE_PROJECTION,null,null,MediaStore.Images.ImageColumns.DATE_MODIFIED + "  DESC");
         if (mCursor != null) {
             // Log.i(TAG, "image count =" + mCursor.getCount());
             while (mCursor.moveToNext()) {

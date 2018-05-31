@@ -1,6 +1,7 @@
 package com.mycamera;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -80,6 +81,7 @@ public class CameraPhotoHelper {
     /**
      * 拍照
      */
+    @SuppressLint("CheckResult")
     public void takePhotoFromCamera() {
         new RxPermissions(mContext).request(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 .subscribe(new Consumer<Boolean>() {
@@ -129,6 +131,7 @@ public class CameraPhotoHelper {
      *
      * @param needSelectAmount 需要选择的图片张数
      */
+    @SuppressLint("CheckResult")
     public void selectMoreFormAlbum(final int needSelectAmount) {
         new RxPermissions(mContext).request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 .subscribe(new Consumer<Boolean>() {

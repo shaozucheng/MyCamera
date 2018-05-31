@@ -31,14 +31,14 @@ public class ImageDirListDialog {
     private RecyclerView mRecyclerView;
     private ImageDirRecycleAdapter mImageDirRecycleAdapter;
 
-    public ImageDirListDialog(Context context, final List<ImageFolder> mImageFolders) {
+    public ImageDirListDialog(Context context) {
         mContext = context;
         mDialog = new AppCompatDialog(context, R.style.camera_dialog_no_screen);
         DialogUtils.resetDialogScreenPosition(mDialog, Gravity.BOTTOM, 0, 0, WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.WRAP_CONTENT);
         mDialog.setCancelable(true);
         mDialog.setCanceledOnTouchOutside(true);
-        mDialog.show();
+
         Window window = mDialog.getWindow();
         window.setContentView(R.layout.list_dir);
         window.setWindowAnimations(R.style.camera_dialog_enter_exit);  //添加dialog进入和退出的动画
@@ -47,14 +47,28 @@ public class ImageDirListDialog {
 
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
         mImageDirRecycleAdapter = new ImageDirRecycleAdapter(context);
-        mImageDirRecycleAdapter.setDatas(mImageFolders);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mImageDirRecycleAdapter);
+
+    }
+
+    public void setImageFolders(final List<ImageFolder> mImageFolders) {
+        mImageDirRecycleAdapter.setDatas(mImageFolders);
+        mImageDirRecycleAdapter.notifyDataSetChanged();
         mImageDirRecycleAdapter.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
                 if (mImageDirSelected != null) {
-                    mImageDirSelected.selectedImageFolder(mImageFolders.get(position));
+                    ImageFolder imageFolder = mImageDirRecycleAdapter.getDatas().get(position);
+                    for (int i = 0; i < mImageFolders.size(); i++) {
+                        if (imageFolder.getPath().equals(mImageFolders.get(i).getPath())) {
+                            mImageFolders.get(i).setSelect(true);
+                        } else {
+                            mImageFolders.get(i).setSelect(false);
+                        }
+                    }
+                    mImageDirRecycleAdapter.notifyDataSetChanged();
+                    mImageDirSelected.selectedImageFolder(mImageDirRecycleAdapter.getDatas().get(position));
                 }
             }
 
@@ -62,6 +76,7 @@ public class ImageDirListDialog {
             public void onItemLongClick(View view, int position) {
             }
         });
+        mDialog.show();
     }
 
 

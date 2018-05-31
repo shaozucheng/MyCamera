@@ -53,14 +53,14 @@ public class AlbumRecycleAdapter extends BaseRecycleAdapter<ImageData> {
         @Override
         public void bindViews(ImageData object) {
             //设置图片
-            final String url = object.getImageLocalPath();
+            final String url = object.path;
             if (!TextUtils.isEmpty(url)) {
                 Glide.with(getContext()).load(url).into(mImageView);
             }
             /**
              * 已经选择过的图片，显示出选择过的效果
              */
-            if (object.isSelect()) {
+            if (object.isSelect) {
                 mImageButton.setImageResource(R.drawable.pictures_selected);
                 mImageView.setColorFilter(Color.parseColor("#77000000"));
             } else {
